@@ -1,0 +1,328 @@
+syntax = "proto3";
+
+option java_package = "com.grpc.server.msg";
+option java_outer_classname = "msgProto";
+option java_multiple_files = true;
+
+package service;
+
+service MsgService{
+    /*
+    *模板消息接口
+    */
+
+    //获取模板列表
+    rpc queryMsgTemp(MsgRequest) returns (QueryMsgResponse){}
+    //删除模板
+    rpc deleteMsgTemp(DeleteMsgRequest) returns (MsgResponse){}
+    //发送模板消息
+    rpc sendMsgTemp(SendMsgRequest) returns (SendMsgResponse){}
+    /*
+    *客服消息
+    */
+
+    //客服接口-发消息
+    rpc customSendMsg(CustMsgRequest) returns (MsgResponse){}
+
+    /*
+    *群发接口和原创校验
+    */
+
+    //上传图文消息内的图片获取URL
+    rpc uploadImg(MsgRequest) returns (UploadImgResponse){}
+    //上传图文消息素材
+    rpc uploadNews(UploadNewsRequest) returns (UploadNewsResponse){}
+    //根据标签进行群发
+    rpc sendallMsg(SendAllMsgRequest) returns (SendAllMsgResponse){}
+    //根据OpenID列表群发
+    rpc sendMsgByOpenID(SendMsgByOpenIDRequest) returns (SendAllMsgResponse){}
+    //查询群发消息发送状态
+    rpc querySendAllStatus(SendStatusRequest) returns (SendStatusResponse){}
+
+    /*
+    *获取公众号的自动回复规则
+    */
+    rpc queryAutoreplyInfo(MsgRequest) returns (AutoreplyInfoResponse){}
+}
+
+/*
+*获取模板列表
+*/
+message TemplateList{
+    string template_id=1;
+    string title=2;
+    string primary_industry=3;
+    string deputy_industry=4;
+    string content=5;
+    string example=6;
+}
+message QueryMsgResponse{
+    repeated TemplateList template_list=1;
+}
+/*
+*删除模板
+*/
+message DeleteMsgRequest{
+    string template_id=1;
+}
+/*
+*发送模板消息
+*/
+message Miniprogram{
+    string appid=1;
+    string pagepath=2;
+
+}
+message Data{
+    message First{
+        string value=1;
+        string color=2;
+    }
+    First first=1;
+    message Keyword1{
+        string value=1;
+        string color=2;
+    }
+    Keyword1 keyword1=2;
+    message Keyword2{
+        string value=1;
+        string color=2;
+    }
+    Keyword2 keyword2=3;
+    message Remark{
+        string value=1;
+        string color=2;
+    }
+    Remark remark=4;
+}
+message SendMsgRequest{
+    string touser=1;
+    string template_id=2;
+    string url=3;
+    Miniprogram miniprogram=4;
+    Data data=5;
+
+}
+message SendMsgResponse{
+    int32 errcode=1;
+    string errmsg=2;
+    int32 msgid=3;
+}
+/*
+*客服接口-发消息
+*/
+message CustMsgRequest{
+    string touser=1;
+    string msgtype=2;
+    message Text{
+        string content=1;
+    }
+    Text text=3;//文本消息
+    message Image{
+        string media_id=1;
+    }
+    Image image=4;//图片消息
+    message Voice{
+        string media_id=1;
+    }
+    Voice voice=5;//语音消息
+    message Video{
+        string media_id=1;
+        string thumb_media_id=2;
+        string title=3;
+        string description=4;
+    }
+    Video video=6;//视频消息
+    message Music{
+        string title=1;
+        string description=2;
+        string musicurl=3;
+        string hqmusicurl=4;
+        string thumb_media_id=5;
+    }
+    Music music=7;//音乐消息
+    message News{
+        message Articles {
+            string title = 1;
+            string description = 2;
+            string url = 3;
+            string picurl = 4;
+        }
+        repeated Articles articles=1;
+    }
+    News news=8;//图文消息（点击跳转到外链）
+    message Mpnews{
+        string media_id=1;
+    }
+    Mpnews mpnews=9;//图文消息（点击跳转到图文消息页面
+    message Wxcard{
+        string card_id=1;
+    }
+    Wxcard wxcard=10;//卡券
+    message Miniprogrampage{
+        string title=1;
+        string appid=2;
+        string pagepath=3;
+        string thumb_media_id=4;
+    }
+    Miniprogrampage miniprogrampage=11;//小程序卡片
+    message Customservice{
+        string kf_account=1;
+    }
+    Customservice  customservice=12;//如果需要以某个客服帐号来发消息（在微信6.0.2及以上版本中显示自定义头像），则需在JSON数据包的后半部分加入customservice参数
+}
+/*
+*群发接口和原创校验
+*/
+message UploadImgResponse{
+    string url=1;
+}
+message UploadNewsRequest{
+    message Articles{
+        string thumb_media_id=1;
+        string author=2;
+        string title=3;
+        string content_source_url=4;
+        string content=5;
+        string digest=6;
+        int32 show_cover_pic=7;
+    }
+    repeated Articles articles=1;//在群发图文中插入小程序，则在调用上传图文消息素材接口时，需在content字段中添加小程序跳转链接（不支持-号）
+}
+message UploadNewsResponse{
+    string type=1;
+    string media_id=2;
+    int32 created_at=3;
+}
+message SendAllMsgRequest{
+    message Filter{
+        bool is_to_all=1;
+        int32 tag_id=2;
+    }
+    Filter filter=1;
+    string msgtype=2;
+    int32 send_ignore_reprint=3;
+    message Mpnews{
+        string media_id=1;
+    }
+    Mpnews mpnews=4;//图文消息
+    message Text{
+        string content=1;
+    }
+    Text text=5;//文本
+    message Voice{
+        string media_id=1;
+    }
+    Voice voice=6;//语音/音频
+    message Image{
+        string media_id=1;
+    }
+    Image image=7;//图片
+    message Wxcard{
+        string card_id=1;
+    }
+    Wxcard wxcard=8;//卡券信息
+    message Mpvideo{
+        string media_id=1;
+    }
+    Mpvideo mpvideo=9;//视频
+}
+message SendAllMsgResponse{
+    int32 errcode=1;
+    string errmsg=2;
+    int32 msg_id=3;
+    int32 msg_data_id=4;
+}
+message SendMsgByOpenIDRequest{
+    repeated string touser=1;
+    string msgtype=2;
+    int32 send_ignore_reprint=3;
+    message Mpnews{
+        string media_id=1;
+    }
+    Mpnews mpnews=4;//图文消息
+    message Text{
+        string content=1;
+    }
+    Text text=5;//文本
+    message Voice{
+        string media_id=1;
+    }
+    Voice voice=6;//语音/音频
+    message Image{
+        string media_id=1;
+    }
+    Image image=7;//图片
+    message Wxcard{
+        string card_id=1;
+    }
+    Wxcard wxcard=8;//卡券信息
+    message Mpvideo{
+        string media_id=1;
+    }
+    Mpvideo mpvideo=9;//视频
+}
+message SendStatusRequest{
+    string msg_id=1;
+}
+message SendStatusResponse{
+    int32 msg_id=1;
+    string msg_status=2;
+}
+message AutoreplyInfoResponse{
+    int32 is_add_friend_reply_open=1;
+    int32 is_autoreply_open=2;
+    message AddFriendAutoreplyInfo{
+        string type=1;
+        string content=2;
+    }
+    AddFriendAutoreplyInfo add_friend_autoreply_info=3;
+    message MessageDefaultAutoreplyInfo{
+        string type=1;
+        string content=2;
+    }
+    MessageDefaultAutoreplyInfo message_default_autoreply_info=4;
+    message KeywordAutoreplyInfo{
+        message KeywordAutoreplyInfoList{
+            string rule_name=1;
+            int32 create_time=2;
+            string reply_mode=3;
+            message KeywordListInfo{
+                string type=1;
+                string match_mode=2;
+                string content=3;
+            }
+            repeated KeywordListInfo keyword_list_info=4;
+            message ReplyListInfo{
+                string type=1;
+                message NewsInfo{
+                    message NewsInfoList{
+                        string title=1;
+                        string author=2;
+                        string digest=3;
+                        int32 show_cover=4;
+                        string cover_url=5;
+                        string content_url=6;
+                        string source_url=7;
+                    }
+                    repeated NewsInfoList list=1;
+                }
+                NewsInfo news_info=2;
+            }
+        }
+        repeated KeywordAutoreplyInfoList list=1;
+    }
+}
+/*
+*公共请求信息
+*/
+message MsgRequest{
+    bytes request = 1;
+}
+/*
+*公共返回信息
+*/
+message MsgResponse{
+    int32 errcode=1;
+    string errmsg=2;
+}

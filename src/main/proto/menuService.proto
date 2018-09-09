@@ -1,0 +1,135 @@
+syntax = "proto3";
+
+option java_package = "com.grpc.server.menu";
+option java_outer_classname = "menuProto";
+option java_multiple_files = true;
+
+package service;
+
+service MenuService{
+    //自定义菜单创建接口
+    rpc createMenu(CreateMenuRequest) returns (MenuResponse){}
+    //自定义菜单查询接口
+    rpc queryMenu(MenuRequest) returns (QueryMenuResponse){}
+    //自定义菜单删除接口
+    rpc deleteMenu(MenuRequest) returns (MenuResponse){}
+    //获取自定义菜单配置接口
+    rpc configMenu(MenuRequest) returns (MenuConfigResponse){}
+}
+/*
+*创建自定义菜单
+*/
+message CreateMenuButton{
+    string type=1;
+    string name=2;
+    string key=3;
+    string media_id=4;
+    repeated CreateMenuSubButton sub_button=5;
+}
+message CreateMenuSubButton{
+    string type=1;
+    string name=2;
+    string url=3;
+    string appid=4;
+    string pagepath=5;
+    repeated CreateMenuSubButton sub_button=6;
+}
+
+message CreateMenuRequest{
+    repeated CreateMenuButton button=1;
+}
+/*
+*查询自定义菜单
+*/
+message QueryMenuSubButton{
+    string type=1;
+    string name=2;
+    string url=3;
+    string key=4;
+    repeated QueryMenuSubButton sub_button=5;
+}
+message QueryMenuButton{
+    string type=1;
+    string name=2;
+    string key=3;
+    repeated QueryMenuSubButton sub_button=4;
+}
+message Matchrule{
+    int32 group_id=1;
+    int32 sex=2;
+    string country=3;
+    string province=4;
+    string city=5;
+    int32 client_platform_type=6;
+}
+message QueryMenu{
+    string type=1;
+    string name=2;
+    string key=3;
+    string media_id=4;
+    repeated QueryMenuButton button=5;
+}
+message ConditionalMenu{
+    repeated QueryMenuButton button=1;
+    repeated QueryMenu matchrule=2;
+    string menuid=3;
+}
+message QueryMenuResponse{
+    QueryMenu menu=1;
+    repeated ConditionalMenu conditionalmenu=2;
+}
+/*
+*自定义菜单配置
+*/
+message MenuConfigButton{
+    string type=1;
+    string name=2;
+    string key=3;
+    string value=4;
+    MenuConfigSubButton sub_button=5;
+}
+message MenuConfigSubButton{
+    MenuConfigSubButtonList list=1;
+
+}
+message MenuConfigSubButtonList{
+    string type=1;
+    string name=2;
+    string url=3;
+    string value=4;
+    MenuConfigSubButtonListNewsInfo news_info=5;
+}
+message MenuConfigSubButtonListNewsInfo{
+    repeated MenuConfigSubButtonListNewsInfoList list=1;
+}
+message MenuConfigSubButtonListNewsInfoList{
+    string title=1;
+    string author=2;
+    string digest=3;
+    int32 show_cover=4;
+    string cover_url=5;
+    string content_url=6;
+    string source_url=7;
+}
+message SelfmenuInfo{
+    repeated MenuConfigButton button=1;
+}
+message MenuConfigResponse{
+    int32 is_menu_open=1;
+    SelfmenuInfo selfmenu_info=2;
+
+}
+/*
+*公共请求信息
+*/
+message MenuRequest{
+    bytes request = 1;
+
+}
+/*
+*公共返回信息
+*/
+message MenuResponse{
+    int32 errcode=1;
+    string errmsg=2;
+}
